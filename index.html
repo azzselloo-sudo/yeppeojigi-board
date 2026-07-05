@@ -122,6 +122,20 @@
   .mval{flex:0 0 92px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;font-size:13px;padding:5px 9px;color:var(--ink)}
   .mval:focus{outline:none;border-color:var(--sage)}
 
+  /* 확인할 사항 checklist */
+  .chk{list-style:none;display:flex;flex-direction:column}
+  .chk li{display:flex;align-items:center;gap:11px;padding:9px 8px;border-radius:8px;transition:background .15s}
+  .chk li:hover{background:#fbf7f2}
+  .chk .box{flex:0 0 20px;height:20px;border-radius:6px;border:2px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .chk .box svg{width:12px;height:12px;opacity:0;transition:.15s}
+  .chk li.done .box{background:var(--sage);border-color:var(--sage)}
+  .chk li.done .box svg{opacity:1}
+  .chk .label{flex:1;border:none;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:0;min-width:0}
+  .chk .label:focus{outline:none}
+  .chk li.done .label{color:var(--muted);text-decoration:line-through}
+  .chk .del{opacity:0;transition:.15s;flex:0 0 auto}
+  .chk li:hover .del{opacity:1}
+
   .add{display:flex;align-items:center;gap:6px;margin-top:8px;background:none;border:none;cursor:pointer;font:inherit;font-size:13px;color:var(--muted);padding:8px;border-radius:8px;transition:.15s}
   .add:hover{color:var(--sage)}
 
@@ -167,7 +181,7 @@
 
   /* touch devices have no hover: always show row action buttons */
   @media (hover:none), (pointer:coarse){
-    .rt .row .btn-s, .rt .kid .del, .fix .actions .btn-s{opacity:1}
+    .rt .row .btn-s, .rt .kid .del, .fix .actions .btn-s, .chk .del{opacity:1}
   }
 
   @media (max-width:720px){
@@ -183,7 +197,7 @@
     .fix .actions{margin-left:32px}
     /* routine rows: keep buttons visible and tidy */
     .rt .row{flex-wrap:wrap}
-    .rt .row .btn-s, .rt .kid .del{opacity:1}
+    .rt .row .btn-s, .rt .kid .del, .chk .del{opacity:1}
     .mval{flex:1 0 80px}
     .modal{padding:12px}
     .modal-box{padding:18px;border-radius:16px;max-height:92vh}
@@ -216,16 +230,28 @@
     <div class="left">
       <div class="figure-wrap" id="fig">
         <svg class="figure" viewBox="0 0 200 480" aria-label="전신 실루엣">
-          <ellipse class="part" cx="100" cy="44" rx="19" ry="23"/>
-          <rect class="part" x="92" y="60" width="16" height="20" rx="7"/>
-          <path class="part" d="M100,78 C86,78 73,82 69,96 C64,114 71,150 75,172
-            C59,190 56,210 65,230 C76,244 90,248 100,249
-            C110,248 124,244 135,230 C144,210 141,190 125,172
-            C129,150 136,114 131,96 C127,82 114,78 100,78 Z"/>
-          <line class="part" x1="74" y1="98" x2="61" y2="184" stroke="var(--body)" stroke-width="14" stroke-linecap="round"/>
-          <line class="part" x1="126" y1="98" x2="139" y2="184" stroke="var(--body)" stroke-width="14" stroke-linecap="round"/>
-          <line class="part" x1="88" y1="242" x2="85" y2="452" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
-          <line class="part" x1="112" y1="242" x2="115" y2="452" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
+          <!-- 작은 얼굴 -->
+          <ellipse class="part" cx="100" cy="33" rx="14.5" ry="17.5"/>
+          <!-- 긴 목 -->
+          <rect class="part" x="93.5" y="45" width="13" height="23" rx="6"/>
+          <!-- 넓은 어깨 → 좁은 허리 → 좁은 골반 -->
+          <path class="part" d="M100,63
+            C85,63 70,68 62,87
+            C57,106 73,140 80,166
+            C74,188 76,205 83,219
+            C89,227 94,229 100,230
+            C106,229 111,227 117,219
+            C124,205 126,188 120,166
+            C127,140 143,106 138,87
+            C130,68 115,63 100,63 Z"/>
+          <!-- 긴 팔 -->
+          <line class="part" x1="65" y1="90" x2="48" y2="214" stroke="var(--body)" stroke-width="12.5" stroke-linecap="round"/>
+          <line class="part" x1="135" y1="90" x2="152" y2="214" stroke="var(--body)" stroke-width="12.5" stroke-linecap="round"/>
+          <!-- 긴 다리: 얇은 허벅지 + 두꺼운 종아리 -->
+          <line class="part" x1="91" y1="222" x2="88" y2="348" stroke="var(--body)" stroke-width="16" stroke-linecap="round"/>
+          <line class="part" x1="88" y1="346" x2="90" y2="466" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
+          <line class="part" x1="109" y1="222" x2="112" y2="348" stroke="var(--body)" stroke-width="16" stroke-linecap="round"/>
+          <line class="part" x1="112" y1="346" x2="110" y2="466" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
         </svg>
       </div>
       <p class="hint">몸을 콕 눌러 표시 · 핀은 드래그로 이동</p>
@@ -250,6 +276,15 @@
         </div>
         <ul class="rt" id="rtList"></ul>
         <button class="add" id="addRt">＋ 항목 추가</button>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>확인할 사항</h2>
+          <span class="right"><span class="count" id="chkCount"></span></span>
+        </div>
+        <ul class="chk" id="chkList"></ul>
+        <button class="add" id="addChk">＋ 항목 추가</button>
       </section>
     </div>
   </div>
@@ -299,6 +334,7 @@ const DEFAULT = () => ({
     {id:nid(), label:"스킨케어", type:"check"},
     {id:nid(), label:"만보 걷기", type:"check"},
   ],
+  checks: [],   // 공부/확인할 사항 (지속, 매일 리셋 안 함)
   log: {}   // log[date][leafId] = true (check) or "value" (measure)
 });
 
@@ -309,6 +345,7 @@ catch(e){ state = DEFAULT(); }
 
 if(!Array.isArray(state.pins)) state.pins = [];
 if(!Array.isArray(state.routines)) state.routines = DEFAULT().routines;
+if(!Array.isArray(state.checks)) state.checks = [];
 if(!state.log){
   state.log = {};
   const t = {};   // seed today from any legacy inline `checked`
@@ -604,6 +641,36 @@ document.getElementById("addRt").addEventListener("click", () => {
   if(inputs.length) inputs[inputs.length-1].focus();
 });
 
+/* ---- 확인할 사항 (지속 체크리스트) ---- */
+const chkList = document.getElementById("chkList");
+function renderChecks(){
+  chkList.innerHTML = "";
+  const done = state.checks.filter(c => c.done).length;
+  document.getElementById("chkCount").textContent = state.checks.length ? done + "/" + state.checks.length : "";
+  if(!state.checks.length){
+    chkList.innerHTML = '<div class="empty">공부하다 확인할 것들을 적어둬요. (예: 영양제 먹는 시간 확인하기)</div>';
+    return;
+  }
+  state.checks.forEach(c => {
+    const li = document.createElement("li");
+    li.className = c.done ? "done" : "";
+    li.innerHTML =
+      '<span class="box">'+CHECK+'</span>'+
+      '<input class="label" value="'+esc(c.label)+'" placeholder="확인할 내용">'+
+      '<button class="btn-s del">삭제</button>';
+    li.querySelector(".box").addEventListener("click", () => { c.done = !c.done; save(); renderChecks(); });
+    li.querySelector(".label").addEventListener("input", e => { c.label = e.target.value; save(); });
+    li.querySelector(".del").addEventListener("click", () => { state.checks = state.checks.filter(x => x.id !== c.id); save(); renderChecks(); });
+    chkList.appendChild(li);
+  });
+}
+document.getElementById("addChk").addEventListener("click", () => {
+  state.checks.push({ id:nid(), label:"", done:false });
+  save(); renderChecks();
+  const ins = chkList.querySelectorAll(".label");
+  if(ins.length) ins[ins.length-1].focus();
+});
+
 /* ---- calendar modal ---- */
 const DOW = ["일","월","화","수","목","금","토"];
 function openCalendar(){
@@ -724,7 +791,7 @@ function esc(s){ return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g
 
 /* ---- sync bridge (Firebase module plugs in here; app works fine without it) ---- */
 function renderAll(){
-  renderPins(); renderFix(); renderRoutines(); renderStreak();
+  renderPins(); renderFix(); renderRoutines(); renderChecks(); renderStreak();
   if(calModal && !calModal.hidden){ renderCalendar(); renderDayDetail(selDate); }
 }
 function applyRemoteState(data){
@@ -740,6 +807,7 @@ function applyRemoteState(data){
   if(!state.log) state.log = {};
   if(!Array.isArray(state.pins)) state.pins = [];
   if(!Array.isArray(state.routines)) state.routines = [];
+  if(!Array.isArray(state.checks)) state.checks = [];
   state.routines.forEach(r => { if(!r.type) r.type = "check"; if(r.children) r.children.forEach(c => { if(!c.type) c.type = "check"; }); });
   localStorage.setItem(KEY, JSON.stringify(state));   // persist locally WITHOUT re-triggering a cloud push
   renderAll();
@@ -749,7 +817,7 @@ window.__board = { getState: () => state, applyRemote: applyRemoteState, onSave:
 
 /* ---- boot ---- */
 save();
-renderPins(); renderFix(); renderRoutines(); renderStreak();
+renderPins(); renderFix(); renderRoutines(); renderChecks(); renderStreak();
 </script>
 
 <script type="module">
