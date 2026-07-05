@@ -106,8 +106,12 @@
   .rt .label{flex:1;border:none;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:0;min-width:0}
   .rt .label:focus{outline:none}
   .rt .done .label{color:var(--muted);text-decoration:line-through}
-  .rt .row .btn-s{opacity:.6;transition:.15s;flex:0 0 auto}
-  .rt .row:hover .btn-s{opacity:1}
+  .rt .row .btn-s{flex:0 0 auto}
+  .rt .acts{display:none;align-items:center;gap:2px;flex:0 0 auto}
+  .rt .row.open .acts{display:flex}
+  .rt .more{border:none;background:none;cursor:pointer;font:inherit;font-size:17px;letter-spacing:1px;color:var(--muted);padding:0 8px;border-radius:12px;opacity:.5;transition:.15s;flex:0 0 auto;line-height:1}
+  .rt .more:hover{opacity:1;background:#efe9e1;color:var(--ink)}
+  .rt .row.open .more{opacity:1;color:var(--ink)}
   .rt .kids{margin-left:31px;display:flex;flex-direction:column}
   .rt .kid{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;transition:background .15s}
   .rt .kid:hover{background:#fbf7f2}
@@ -539,13 +543,17 @@ function renderRoutines(){
         '<div class="row'+(allDone?" done":"")+'">'+
           '<span class="box">'+CHECK+'</span>'+
           '<input class="label" value="'+esc(r.label)+'" placeholder="루틴 이름">'+
-          '<button class="btn-s subadd">＋하위</button>'+
-          '<button class="btn-s del">삭제</button>'+
+          '<span class="acts">'+
+            '<button class="btn-s subadd">＋하위</button>'+
+            '<button class="btn-s del">삭제</button>'+
+          '</span>'+
+          '<button class="more" title="옵션">⋯</button>'+
         '</div>';
       li.querySelector(".box").addEventListener("click", () => {
         const v = !allDone; kids.forEach(c => setLeaf(TODAY, c.id, v ? true : false)); afterChange();
       });
       li.querySelector(".label").addEventListener("input", e => { r.label = e.target.value; save(); });
+      li.querySelector(".more").addEventListener("click", () => li.querySelector(".row").classList.toggle("open"));
       li.querySelector(".subadd").addEventListener("click", () => addChild(r));
       li.querySelector(".del").addEventListener("click", () => { removeRoutine(r); });
 
@@ -573,10 +581,14 @@ function renderRoutines(){
           '<span class="mtag">측정</span>'+
           '<input class="label" value="'+esc(r.label)+'" placeholder="측정 항목 (예: 몸무게)">'+
           '<input class="mval" value="'+esc(val)+'" placeholder="값" inputmode="decimal">'+
-          '<button class="btn-s tocheck">체크로</button>'+
-          '<button class="btn-s del">삭제</button>'+
+          '<span class="acts">'+
+            '<button class="btn-s tocheck">체크로</button>'+
+            '<button class="btn-s del">삭제</button>'+
+          '</span>'+
+          '<button class="more" title="옵션">⋯</button>'+
         '</div>';
       const row = li.querySelector(".row");
+      li.querySelector(".more").addEventListener("click", () => row.classList.toggle("open"));
       li.querySelector(".label").addEventListener("input", e => { r.label = e.target.value; save(); });
       li.querySelector(".mval").addEventListener("input", e => {
         const v = e.target.value;
@@ -596,12 +608,16 @@ function renderRoutines(){
         '<div class="row'+(done?" done":"")+'">'+
           '<span class="box">'+CHECK+'</span>'+
           '<input class="label" value="'+esc(r.label)+'" placeholder="루틴 이름">'+
-          '<button class="btn-s tomeasure">측정</button>'+
-          '<button class="btn-s subadd">＋하위</button>'+
-          '<button class="btn-s del">삭제</button>'+
+          '<span class="acts">'+
+            '<button class="btn-s tomeasure">측정</button>'+
+            '<button class="btn-s subadd">＋하위</button>'+
+            '<button class="btn-s del">삭제</button>'+
+          '</span>'+
+          '<button class="more" title="옵션">⋯</button>'+
         '</div>';
       li.querySelector(".box").addEventListener("click", () => { setLeaf(TODAY, r.id, done ? false : true); afterChange(); });
       li.querySelector(".label").addEventListener("input", e => { r.label = e.target.value; save(); });
+      li.querySelector(".more").addEventListener("click", () => li.querySelector(".row").classList.toggle("open"));
       li.querySelector(".tomeasure").addEventListener("click", () => { r.type = "measure"; setLeaf(TODAY, r.id, false); afterChange(); });
       li.querySelector(".subadd").addEventListener("click", () => addChild(r));
       li.querySelector(".del").addEventListener("click", () => { removeRoutine(r); });
