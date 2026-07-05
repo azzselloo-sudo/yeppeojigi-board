@@ -39,6 +39,7 @@
   .head-right{display:flex;align-items:center;gap:8px}
   .tool-btn{border:none;background:none;cursor:pointer;font:inherit;font-size:12.5px;color:var(--muted);padding:4px 10px;border-radius:14px;transition:.15s;white-space:nowrap}
   .tool-btn:hover{background:#efe9e1;color:var(--ink)}
+  .tool-btn.on{color:var(--sage);font-weight:700}
   .streak{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500;color:var(--muted)}
   .streak b{color:var(--sage);font-weight:700}
   .streak .flame{font-size:17px;filter:grayscale(1);opacity:.4;transition:.2s}
@@ -201,6 +202,7 @@
   <header>
     <h1>예뻐지기 ✨</h1>
     <div class="head-right">
+      <button class="tool-btn" id="loginBtn" title="구글 로그인하면 폰·PC 자동 동기화">☁ 로그인</button>
       <button class="tool-btn" id="exportBtn" title="지금 데이터를 파일로 저장">⤓ 백업</button>
       <button class="tool-btn" id="importBtn" title="백업 파일에서 복원">⤒ 복원</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden>
@@ -323,7 +325,10 @@ state.routines.forEach(r => {
 });
 delete state.history; delete state.lastDate; delete state.lastCheckDate; delete state.streak;
 
-const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const save = () => {
+  localStorage.setItem(KEY, JSON.stringify(state));
+  if(window.__board && window.__board.onSave) window.__board.onSave();
+};
 
 /* ---- log helpers ---- */
 function logGet(date, id){ return (state.log[date] || {})[id]; }
@@ -717,9 +722,101 @@ document.getElementById("importFile").addEventListener("change", e => { if(e.tar
 /* ---- util ---- */
 function esc(s){ return String(s==null?"":s).replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
+/* ---- sync bridge (Firebase module plugs in here; app works fine without it) ---- */
+function renderAll(){
+  renderPins(); renderFix(); renderRoutines(); renderStreak();
+  if(calModal && !calModal.hidden){ renderCalendar(); renderDayDetail(selDate); }
+}
+function applyRemoteState(data){
+  if(!data || typeof data !== "object") return false;
+  const incomingEmpty = (!Array.isArray(data.pins) || data.pins.length === 0) && (!data.log || Object.keys(data.log).length === 0);
+  const localHasData = state.pins.length > 0 || Object.keys(state.log || {}).length > 0;
+  if(incomingEmpty && localHasData){                 // never let an empty cloud wipe local; push local up instead
+    if(window.__board && window.__board.onSave) window.__board.onSave();
+    return false;
+  }
+  if(JSON.stringify(data) === JSON.stringify(state)) return false;
+  state = data;
+  if(!state.log) state.log = {};
+  if(!Array.isArray(state.pins)) state.pins = [];
+  if(!Array.isArray(state.routines)) state.routines = [];
+  state.routines.forEach(r => { if(!r.type) r.type = "check"; if(r.children) r.children.forEach(c => { if(!c.type) c.type = "check"; }); });
+  localStorage.setItem(KEY, JSON.stringify(state));   // persist locally WITHOUT re-triggering a cloud push
+  renderAll();
+  return true;
+}
+window.__board = { getState: () => state, applyRemote: applyRemoteState, onSave: null };
+
 /* ---- boot ---- */
 save();
 renderPins(); renderFix(); renderRoutines(); renderStreak();
+</script>
+
+<script type="module">
+/* Firebase sync — isolated so a load failure (e.g. offline) never breaks the core app */
+try {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
+  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } =
+    await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
+  const { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } =
+    await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBxoK1Y795_aiq9IhhnsYSfMWqH5nV377U",
+    authDomain: "yeppeojigi-3b921.firebaseapp.com",
+    projectId: "yeppeojigi-3b921",
+    storageBucket: "yeppeojigi-3b921.firebasestorage.app",
+    messagingSenderId: "280615157228",
+    appId: "1:280615157228:web:66d1828e4340918e3294c9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+  const B = window.__board;
+  const loginBtn = document.getElementById("loginBtn");
+
+  let user = null, unsub = null, pushTimer = null;
+
+  function updateUI(u){
+    if(u){ loginBtn.textContent = "✓ 동기화"; loginBtn.title = (u.email || "") + " · 눌러서 로그아웃"; loginBtn.classList.add("on"); }
+    else { loginBtn.textContent = "☁ 로그인"; loginBtn.title = "구글 로그인하면 폰·PC 자동 동기화"; loginBtn.classList.remove("on"); }
+  }
+  async function push(){
+    if(!user) return;
+    try { await setDoc(doc(db, "boards", user.uid), { data: B.getState(), updatedAt: serverTimestamp() }); }
+    catch(e){ console.warn("cloud push failed", e); }
+  }
+  B.onSave = () => { clearTimeout(pushTimer); pushTimer = setTimeout(push, 800); };
+
+  loginBtn.addEventListener("click", async () => {
+    if(user){ if(confirm("로그아웃할까요? (이 기기 화면 데이터는 그대로 남아요)")) await signOut(auth); return; }
+    try { await signInWithPopup(auth, provider); }
+    catch(e){
+      if(e && (e.code === "auth/popup-blocked" || e.code === "auth/cancelled-popup-request" || e.code === "auth/popup-closed-by-user" || e.code === "auth/operation-not-supported-in-this-environment")){
+        try { await signInWithRedirect(auth, provider); } catch(_){}
+      } else { console.warn("login failed", e); }
+    }
+  });
+
+  onAuthStateChanged(auth, async (u) => {
+    user = u; updateUI(u);
+    if(unsub){ unsub(); unsub = null; }
+    if(!u) return;
+    const ref = doc(db, "boards", u.uid);
+    try {
+      const snap = await getDoc(ref);
+      if(snap.exists() && snap.data() && snap.data().data) B.applyRemote(snap.data().data);
+      else await push();                                   // first sign-in on this account: seed cloud from local
+      unsub = onSnapshot(ref, ds => { if(ds.exists() && ds.data() && ds.data().data) B.applyRemote(ds.data().data); });
+    } catch(e){ console.warn("cloud sync init failed", e); }
+  });
+
+  getRedirectResult(auth).catch(() => {});
+} catch(e){
+  console.warn("Firebase sync unavailable (app still works offline):", e);
+}
 </script>
 </body>
 </html>
