@@ -106,7 +106,7 @@
   .rt .label{flex:1;border:none;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:0;min-width:0}
   .rt .label:focus{outline:none}
   .rt .done .label{color:var(--muted);text-decoration:line-through}
-  .rt .row .btn-s{opacity:0;transition:.15s;flex:0 0 auto}
+  .rt .row .btn-s{opacity:.6;transition:.15s;flex:0 0 auto}
   .rt .row:hover .btn-s{opacity:1}
   .rt .kids{margin-left:31px;display:flex;flex-direction:column}
   .rt .kid{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;transition:background .15s}
@@ -114,7 +114,7 @@
   .rt .kid .box{flex:0 0 17px;height:17px;border-radius:5px}
   .rt .kid .box svg{width:10px;height:10px}
   .rt .kid .label{font-size:13px}
-  .rt .kid .del{opacity:0;transition:.15s;flex:0 0 auto}
+  .rt .kid .del{opacity:.6;transition:.15s;flex:0 0 auto}
   .rt .kid:hover .del{opacity:1}
   /* measure */
   .mtag{flex:0 0 auto;font-size:10.5px;font-weight:500;color:#c07f7f;background:var(--rose-soft);padding:2px 8px;border-radius:11px}
@@ -133,7 +133,7 @@
   .chk .label{flex:1;border:none;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:0;min-width:0}
   .chk .label:focus{outline:none}
   .chk li.done .label{color:var(--muted);text-decoration:line-through}
-  .chk .del{opacity:0;transition:.15s;flex:0 0 auto}
+  .chk .del{opacity:.6;transition:.15s;flex:0 0 auto}
   .chk li:hover .del{opacity:1}
 
   .add{display:flex;align-items:center;gap:6px;margin-top:8px;background:none;border:none;cursor:pointer;font:inherit;font-size:13px;color:var(--muted);padding:8px;border-radius:8px;transition:.15s}
@@ -230,28 +230,16 @@
     <div class="left">
       <div class="figure-wrap" id="fig">
         <svg class="figure" viewBox="0 0 200 480" aria-label="전신 실루엣">
-          <!-- 작은 얼굴 -->
-          <ellipse class="part" cx="100" cy="33" rx="14.5" ry="17.5"/>
-          <!-- 긴 목 -->
-          <rect class="part" x="93.5" y="45" width="13" height="23" rx="6"/>
-          <!-- 넓은 어깨 → 좁은 허리 → 좁은 골반 -->
-          <path class="part" d="M100,63
-            C85,63 70,68 62,87
-            C57,106 73,140 80,166
-            C74,188 76,205 83,219
-            C89,227 94,229 100,230
-            C106,229 111,227 117,219
-            C124,205 126,188 120,166
-            C127,140 143,106 138,87
-            C130,68 115,63 100,63 Z"/>
-          <!-- 긴 팔 -->
-          <line class="part" x1="65" y1="90" x2="48" y2="214" stroke="var(--body)" stroke-width="12.5" stroke-linecap="round"/>
-          <line class="part" x1="135" y1="90" x2="152" y2="214" stroke="var(--body)" stroke-width="12.5" stroke-linecap="round"/>
-          <!-- 긴 다리: 얇은 허벅지 + 두꺼운 종아리 -->
-          <line class="part" x1="91" y1="222" x2="88" y2="348" stroke="var(--body)" stroke-width="16" stroke-linecap="round"/>
-          <line class="part" x1="88" y1="346" x2="90" y2="466" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
-          <line class="part" x1="109" y1="222" x2="112" y2="348" stroke="var(--body)" stroke-width="16" stroke-linecap="round"/>
-          <line class="part" x1="112" y1="346" x2="110" y2="466" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
+          <ellipse class="part" cx="100" cy="44" rx="19" ry="23"/>
+          <rect class="part" x="92" y="60" width="16" height="20" rx="7"/>
+          <path class="part" d="M100,78 C86,78 73,82 69,96 C64,114 71,150 75,172
+            C59,190 56,210 65,230 C76,244 90,248 100,249
+            C110,248 124,244 135,230 C144,210 141,190 125,172
+            C129,150 136,114 131,96 C127,82 114,78 100,78 Z"/>
+          <line class="part" x1="74" y1="98" x2="61" y2="184" stroke="var(--body)" stroke-width="14" stroke-linecap="round"/>
+          <line class="part" x1="126" y1="98" x2="139" y2="184" stroke="var(--body)" stroke-width="14" stroke-linecap="round"/>
+          <line class="part" x1="88" y1="242" x2="85" y2="452" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
+          <line class="part" x1="112" y1="242" x2="115" y2="452" stroke="var(--body)" stroke-width="22" stroke-linecap="round"/>
         </svg>
       </div>
       <p class="hint">몸을 콕 눌러 표시 · 핀은 드래그로 이동</p>
